@@ -179,7 +179,7 @@ begin
 	an(3 downto 0) <= "1111" when x"1",
 	                   w_sel when others;
 	
-	with w_seg select
+	with w_sel select
 	seg(6 downto 0) <= (not(w_sign) & "111111") when x"7",
 	                   w_seg when others;
 	                         
