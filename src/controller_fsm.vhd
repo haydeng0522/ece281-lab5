@@ -39,7 +39,34 @@ end controller_fsm;
 
 architecture FSM of controller_fsm is
 
+	type sm_display is (blank, loadA, loadB, result);
+	
+	signal current_display, next_display: sm_display;
+
 begin
 
+    next_display <= current_display when i_adv = '0' else 
+                    loadA when (current_display = blank) else
+                    loadB when (current_display = loadA) else
+                    result when (current_display = loadB) else
+                    blank;                    
+
+    with current_display select
+    o_cycle <= x"1" when blank,
+               x"2" when loadA,
+               x"4" when loadB,
+               x"8" when result,
+               x"0" when others;
+               
+	state_register : process(i_reset)
+	begin
+	   if i_reset = '1' then
+	       current_display <= blank;
+	   else
+            if i_adv = '1' then
+                current_display <= next_display;
+            end if;
+      end if;
+	end process state_register; 
 
 end FSM;
