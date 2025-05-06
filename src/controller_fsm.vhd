@@ -54,13 +54,13 @@ begin
     o_cycle(1) <= not(f_Q(3)) and not(f_Q(2)) and f_Q(1) and not(f_Q(0));
     o_cycle(0) <= not(f_Q(3)) and not(f_Q(2)) and not(f_Q(1)) and f_Q(0);
                
-	state_register : process(i_reset, i_adv)
+	state_register : process(i_adv)
 	begin
-	   if i_reset = '1' then
-	       f_Q <= "0001";
-	   else
-            if i_adv = '1' then
-                f_Q <= f_Q_next;
+	   if rising_edge(i_adv) then
+	       if i_reset = '1' then
+	           f_Q <= "0001";
+	       else
+               f_Q <= f_Q_next;
             end if;
       end if;
 	end process state_register; 

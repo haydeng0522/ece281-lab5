@@ -24,8 +24,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
-use IEEE.NUMERIC_STD.ALL;
-use IEEE.std_logic_signed.all;
+use ieee.NUMERIC_STD.all;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
@@ -47,15 +46,20 @@ signal carry_result : std_logic_vector(8 downto 0); -- one bit greater to check 
 
 begin
     
-    with i_op select
-    result <= (i_A + i_B) when "000",
-              (i_A - i_B) when "001",
-              (i_A and i_B) when "010",
-              (i_A or i_B) when others;
+     process(i_A, i_B, i_op)
+    begin
+        case(i_op) is
+        when "000" => result <= std_logic_vector(unsigned(i_A) + unsigned(i_B));
+        when "001" => result <= std_logic_vector(unsigned(i_A) - unsigned(i_B));
+        when "010" => result <= i_A and i_B;
+        when others => result <= i_A or i_B;
+        end case;
+     end process;
+  
     
     with i_op select
-    carry_result <= ('0' & i_A) + ('0' & i_B) when "000",
-                    ('0' & i_A) + ('0' & (not(i_B) + 1)) when others; 
+    carry_result <= std_logic_vector(('0' & unsigned(i_A)) + ('0' & unsigned(i_B))) when "000",
+                    std_logic_vector(('0' & unsigned(i_A)) + ('0' & (not(unsigned(i_B)) + 1))) when others; 
     
     
     o_result <= result;
@@ -66,7 +70,7 @@ begin
     o_flags(1) <= carry_result(8);
     o_flags(2) <= '1' when result = "00000000" else
                   '0';
-    o_flags(3) <= '1' when result < 0 else
+    o_flags(3) <= '1' when result < "00000000" else
                   '0';
     
 end Behavioral;
