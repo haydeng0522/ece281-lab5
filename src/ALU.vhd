@@ -49,8 +49,8 @@ begin
      process(i_A, i_B, i_op)
     begin
         case(i_op) is
-        when "000" => result <= std_logic_vector(unsigned(i_A) + unsigned(i_B));
-        when "001" => result <= std_logic_vector(unsigned(i_A) - unsigned(i_B));
+        when "000" => result <= std_logic_vector(signed(i_A) + signed(i_B));
+        when "001" => result <= std_logic_vector(signed(i_A) - signed(i_B));
         when "010" => result <= i_A and i_B;
         when others => result <= i_A or i_B;
         end case;
@@ -58,7 +58,7 @@ begin
   
     
     with i_op select
-    carry_result <= std_logic_vector(('0' & unsigned(i_A)) + ('0' & unsigned(i_B))) when "000",
+    carry_result <= std_logic_vector(('0' & signed(i_A)) + ('0' & signed(i_B))) when "000",
                     std_logic_vector(('0' & unsigned(i_A)) + ('0' & (not(unsigned(i_B)) + 1))) when others; 
     
     
@@ -67,10 +67,10 @@ begin
                   '1' when i_op = "000" and i_A(7) = i_B(7) else
                   '1' when i_op = "001" and i_A(7) = not(i_B(7)) else
                   '0'; 
-    o_flags(1) <= carry_result(8);
+    o_flags(1) <= carry_result(8) when (i_op = "000" or i_op = "001") else
+                  '0';
     o_flags(2) <= '1' when result = "00000000" else
                   '0';
-    o_flags(3) <= '1' when result < "00000000" else
-                  '0';
+    o_flags(3) <= result(7);
     
 end Behavioral;
