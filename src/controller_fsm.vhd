@@ -39,32 +39,28 @@ end controller_fsm;
 
 architecture FSM of controller_fsm is
 
-	type sm_display is (blank, loadA, loadB, result);
+    signal f_Q : std_logic_vector(3 downto 0) := "0001";
+    signal f_Q_next : std_logic_vector(3 downto 0) := "0010";
 	
-	signal current_display, next_display: sm_display;
-
 begin
-
-    next_display <= current_display when i_adv = '0' else 
-                    loadA when (current_display = blank) else
-                    loadB when (current_display = loadA) else
-                    result when (current_display = loadB) else
-                    blank;                    
-
-    with current_display select
-    o_cycle <= x"1" when blank,
-               x"2" when loadA,
-               x"4" when loadB,
-               x"8" when result,
-               x"0" when others;
+    
+    f_Q_next(3) <= f_Q(2);
+    f_Q_next(2) <= f_Q(1);
+    f_Q_next(1) <= f_Q(0);
+    f_Q_next(0) <= f_Q(3);                   
+    
+    o_cycle(3) <= f_Q(3) and not(f_Q(2)) and not(f_Q(1)) and not(f_Q(0));
+    o_cycle(2) <= not(f_Q(3)) and f_Q(2) and not(f_Q(1)) and not(f_Q(0));
+    o_cycle(1) <= not(f_Q(3)) and not(f_Q(2)) and f_Q(1) and not(f_Q(0));
+    o_cycle(0) <= not(f_Q(3)) and not(f_Q(2)) and not(f_Q(1)) and f_Q(0);
                
-	state_register : process(i_reset)
+	state_register : process(i_reset, i_adv)
 	begin
 	   if i_reset = '1' then
-	       current_display <= blank;
+	       f_Q <= "0001";
 	   else
             if i_adv = '1' then
-                current_display <= next_display;
+                f_Q <= f_Q_next;
             end if;
       end if;
 	end process state_register; 
